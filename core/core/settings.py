@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "test")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", True)
 
-ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOSTS", ["*"])]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'traffic',
     'drf_spectacular',
 ]
 
@@ -76,11 +77,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
-        'NAME': os.environ.get("POSTGRES_DB"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'HOST': os.environ.get("POSTGRES_HOST", "postgres"),
-        'PORT': os.environ.get("POSTGRES_PORT", 5432),
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': os.environ.get("DB_HOST"),
+        'PORT': os.environ.get("DB_PORT", 5432),
     }   
 }
 
@@ -142,8 +143,8 @@ REST_FRAMEWORK={
 
 # Swagger Configuration
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'Traffic Project Api',
+    'DESCRIPTION': 'Intelligent urban traffic monitoring system',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
