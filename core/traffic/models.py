@@ -8,9 +8,12 @@ class Cameras(models.Model):
         verbose_name=_("name")
     )
     
+    def __str__(self):
+        return self.name
+    
     class Meta:
-        verbose_name = _("Traffic logs")
-        verbose_name_plural = _("Traffic logs")    
+        verbose_name = _("Cameras")
+        verbose_name_plural = _("Cameras")    
     
 class Types(models.IntegerChoices):
     heavy_car = 1, _("heavy car")
@@ -36,6 +39,9 @@ class TrafficLogs(models.Model):
         choices=Types.choices,
         verbose_name=_("type id")
     )
+    
+    def __str__(self):
+        return self.plate_number
     
     class Meta:
         verbose_name = _("Traffic logs")

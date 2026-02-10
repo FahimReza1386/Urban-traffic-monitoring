@@ -10,3 +10,8 @@ class TrafficLogsAdmin(admin.ModelAdmin):
     list_display = ("plate_number", "camera_id", "timestamp", "type_id")
     list_filter = ("type_id",)
     search_fields = ("plate_number", "type_id")
+    
+@admin.register(Cameras)
+class CamerasAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("id", "name")

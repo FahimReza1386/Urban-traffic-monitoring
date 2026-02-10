@@ -148,3 +148,11 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+# Neo4j Configuration
+neo_auth_string = os.environ.get("NEO4J_AUTH") 
+
+NEO4J_CONFIG = {
+    'uri': 'neo4j://neo4j:7687',
+    'auth': ("neo4j", "traffic@2684")
+}
