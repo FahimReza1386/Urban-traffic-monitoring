@@ -1,6 +1,10 @@
-# graph_service.py
-from neo4j import GraphDatabase
+# Django Imports
 from django.conf import settings
+
+# Third-Party Imports
+from neo4j import GraphDatabase
+from rest_framework import status
+from rest_framework.response import Response
 
 class GraphService:
     def __init__(self):
@@ -13,78 +17,111 @@ class GraphService:
         except Exception as e:
             print(f"Error connecting to Neo4j: {e}")
             self.driver = None
-
-    def get_car_detailed_path(self, plate_number):
-        """
-        مسیر پیشرفته یک خودرو را برمی‌گرداند (شامل زمان و نوع خودرو).
-        """
-        cypher_query = """
-        MATCH (c:Car {plate_number: $plate_number})-[r:PASSED]->(cam:Camera)
-        RETURN cam.name as camera_name, 
-               r.timestamp as timestamp, 
-               c.type_id as type_id
-        ORDER BY r.timestamp ASC
-        """
         
+    def get_traffic_by_plate_number_path(self, plate_number=None, page_number=1, limit=10):
+        if plate_number != None:
+            cypher_query = """ 
+            MATCH (cam)-[r:PASSED]->(c:Car {plate_number: $plate_number})
+            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS id , c.plate_number AS plate_number
+            ORDER BY timestamp DESC
+            SKIP $skipValue
+            LIMIT $limit
+            """
+        else:
+            cypher_query = """ 
+            MATCH (cam)-[r:PASSED]->(c:Car)
+            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS id , c.plate_number AS plate_number
+            ORDER BY timestamp DESC
+            SKIP $skipValue
+            LIMIT $limit
+            """
+        
+        skip_value = max(page_number - 1, 0) * limit
+
         if not self.driver:
             return []
-        
+
         with self.driver.session() as session:
-            result = session.run(cypher_query, {"plate_number": plate_number})
-            
+            result = session.run(
+                cypher_query,
+                {"plate_number": plate_number, "skipValue": skip_value, "limit": limit}
+            )
+
             path_list = []
             for record in result:
                 path_list.append({
-                    "camera": record["camera_name"],
+                    "id" : record["id"],
+                    "plate_number" : record["plate_number"],
+                    "camera": record["camera"],
                     "timestamp": str(record["timestamp"]),
                     "type_id": record["type_id"]
                 })
+
             return path_list
+    
+    def get_suspicious_vehicles(self, page_number, limit):
+        skip_value = (limit - 1) * page_number
 
-    def get_all_traffic_logs(self):
         cypher_query = """
-        MATCH (c:Car)-[r:PASSED]->(cam:Camera)
-        RETURN c.plate_number as plate, 
-               cam.name as camera_name, 
-               r.timestamp as timestamp, 
-               c.type_id as type_id
-        ORDER BY r.timestamp DESC
-        LIMIT 100
+        MATCH (c:Car)
+        WITH c.plate_number AS plate_number, COLLECT(DISTINCT c.type_id) AS type_ids
+        WHERE SIZE(type_ids) > 1
+        RETURN plate_number, type_ids
+        ORDER BY plate_number
+        SKIP $skip_value
+        LIMIT $page_size
         """
         
-        if not self.driver:
-            return []
+        params = {
+            'skip_value': skip_value,
+            'page_size': limit
+        }
 
-        with self.driver.session() as session:
-            result = session.run(cypher_query)
-            
-            data_list = []
+        if not graph_service.driver:
+            return Response({"error": "Neo4j driver not initialized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        with graph_service.driver.session() as session:
+            result = session.run(cypher_query, params)
+            data = []
             for record in result:
-                data_list.append({
-                    "plate": record["plate"],
-                    "camera": record["camera_name"],
-                    "timestamp": str(record["timestamp"]),
-                    "type_id": record["type_id"]
+                data.append({
+                    "plate_number": record["plate_number"],
+                    "type_ids": record["type_ids"]
                 })
-            return data_list
 
-    def get_traffic_by_plate_number_path(self, plate_number):
-        cypher_query = """
-        MATCH path = (c:Car {plate_number: $plate_number})-[:PASSED*]->(cam)
-        RETURN [node IN nodes(path) | node.name] as cameras
-        LIMIT 10
-        """
-        
-        if not self.driver:
-            return None
-
+            return data
+    def delete_all_data(self):
         with self.driver.session() as session:
-            result = session.run(cypher_query, {"plate_number": plate_number})
-            single_record = result.single()
-            if single_record:
-                return single_record["cameras"]
-            return None
-
+            session.run("MATCH (n) DETACH DELETE n")
+        
+    def get_all_traffic_logs(self, page_number, limit):
+        cypher_query = """
+        MATCH (cam)-[r:PASSED]->(c:Car)
+        RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, c.plate_number AS plate_number, c.id AS id
+        ORDER BY timestamp DESC
+        SKIP $skipValue
+        LIMIT $limit
+        """
+        skip_value = max(page_number - 1, 0) * limit
+        
+        with self.driver.session() as session:  
+            result = session.run(
+                cypher_query,
+                {
+                    "skipValue": skip_value, "limit": limit
+                }
+            )
+            return [
+            {
+                "id" : record["id"],
+                "plate_number": record["plate_number"],
+                "camera": record["camera"],
+                "timestamp": str(record["timestamp"]),
+                "type_id": record["type_id"]
+            }
+            for record in result
+            ]
+            
     def close(self):
         if self.driver:
             self.driver.close()

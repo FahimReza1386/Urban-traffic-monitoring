@@ -5,7 +5,8 @@ from django.utils.translation import gettext_lazy as _
 class Cameras(models.Model):
     name = models.CharField(
         max_length=50,
-        verbose_name=_("name")
+        verbose_name=_("name"),
+        db_index=True
     )
     
     def __str__(self):
@@ -23,14 +24,13 @@ class Types(models.IntegerChoices):
     
 class TrafficLogs(models.Model):
     plate_number = models.CharField(
-        max_length=6,
         verbose_name=_("plate number"),
     )
     camera_id = models.ForeignKey(
         Cameras,
         on_delete=models.PROTECT,
         verbose_name=_("camera id")
-    )
+    )   
     timestamp = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("timestamp")
@@ -39,7 +39,6 @@ class TrafficLogs(models.Model):
         choices=Types.choices,
         verbose_name=_("type id")
     )
-    
     def __str__(self):
         return self.plate_number
     
@@ -51,3 +50,24 @@ class TrafficLogs(models.Model):
             models.Index(fields=['camera_id', 'timestamp'], name='camera_time_idx'),
             models.Index(fields=['-timestamp'], name='timestamp_desc_idx'),
         ]
+        
+class SuspiciousVehicles(models.Model):
+    plate_number = models.CharField(
+        verbose_name=_("plate number"),
+    )
+    camera_id = models.ForeignKey(
+        Cameras,
+        on_delete=models.PROTECT,
+        verbose_name=_("camera id")
+    )
+    type_id = models.IntegerField(
+        choices=Types.choices,
+        verbose_name=_("type id")
+    ) 
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("timestamp")
+    )
+    class Meta:
+        verbose_name = _("suspicious vehicles")
+        verbose_name_plural = _("suspicious vehicles")    

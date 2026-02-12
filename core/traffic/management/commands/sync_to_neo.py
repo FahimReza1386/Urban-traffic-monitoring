@@ -28,10 +28,11 @@ class Command(BaseCommand):
                 cypher_query = """
                 MERGE (c:Car {plate_number: $plate_number})
                 SET c.type_id = $type_id
+                SET c.id = $id
                 
                 MERGE (cam:Camera {name: $camera_name})
                 
-                MERGE (c)-[r:PASSED {log_id: $log_id}]->(cam)
+                MERGE (cam)-[r:PASSED]->(c)
                 SET r.timestamp = datetime($timestamp),
                     r.type_id = $type_id
                 """
@@ -41,6 +42,7 @@ class Command(BaseCommand):
                     'camera_name': camera_name,
                     'timestamp': log.timestamp.isoformat(),
                     'type_id': log.type_id,
+                    'id': log.id,
                 }
                 
                 session.run(cypher_query, params)

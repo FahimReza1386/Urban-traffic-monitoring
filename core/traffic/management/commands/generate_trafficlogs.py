@@ -18,7 +18,7 @@ class Command(BaseCommand):
         all_cameras = list(Cameras.objects.all())
         
         batch_size = 5000
-        total_records = 2000000
+        total_records = 80000
         logs_to_create = []
 
         base_time = datetime.now()
