@@ -78,25 +78,48 @@ class DeleteTraffic(ListAPIView):
             "data": tracking
         })
 
-# class SuspiciousVehiclesNeo4jAPIView(ListAPIView):
-#     def get(self, request, page_number, limit):
-#         start_time = time.time()
-#         graph_service = GraphService()
-#         tracking = graph_service.get_suspicious_vehicles(
-#             page_number, limit
-#         )
-#         end_time = time.time()
-#         full_time = start_time - end_time 
-#         return Response({"path": tracking, "full_time":full_time})
+class SuspiciousTrafficLogView(ListAPIView):
+      
+    serializer_class = CarTrackingViewSerializer
+    @extend_schema(
+            parameters=[CarTrackingViewSerializer],
+    )
+    def get(self, request):
+        start_time = time.perf_counter()
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+                
+        graph_service = GraphService()
+        
+        
+        plate_number = serializer.validated_data.get("plate_number")
+        page = serializer.validated_data["page"]
+        per_page = serializer.validated_data["per_page"]
+        
+        if plate_number is not None:
+            try:
+                page = int(page) if page else 1
+                per_page = int(per_page) if per_page else 10
+            except ValueError:
+                return Response(
+                    {"error": "page و per_page باید عدد باشند"},
+                    status=400
+                )
+            
+            tracking = graph_service.get_suspicious_vehicles(
+                plate_number, page, per_page
+            )
 
-
-# class GettingTrafficLogsAll(ListAPIView):
-#     cache_response_timeout = 60 * 1
-#     def get(self, request, page_number, limit):
-#         start_time = time.time()
-#         graph_service = GraphService()
-#         tracking = graph_service.get_all_traffic_logs(page_number, limit)
-#         end_time = time.time()
-#         full_time = end_time - start_time 
-#         time_formatted = str(datetime.utcfromtimestamp(full_time).strftime('%M:%S.%f'))[:-3]
-#         return Response({"path": tracking, "full_time":time_formatted})
+            if not tracking:
+                return Response(
+                    {"error": "خودرو یافت نشد یا ترددی ثبت نشده است"}, 
+                    status=404
+                )
+       
+        else:
+            tracking = graph_service.get_suspicious_vehicles(
+                None, page, per_page
+            )
+        run_time = round(time.perf_counter() - start_time, 6)
+        return Response({"result": tracking, "runtime":run_time}, status=status.HTTP_200_OK)
+  

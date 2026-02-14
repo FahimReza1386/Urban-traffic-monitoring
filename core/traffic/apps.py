@@ -29,6 +29,15 @@ class TrafficConfig(AppConfig):
                     FOR (c:Camera) ON (c.name)
                     """)
                     
+                    session.run("""
+                    CREATE INDEX suspicious_plate IF NOT EXISTS 
+                    FOR (c:suspicious) ON (c.plate_number)
+                    """)
+                    session.run("""
+                    CREATE INDEX suspicious_plate IF NOT EXISTS 
+                    FOR (c:suspicious) ON (c.timestamp)
+                    """)
+                    
                     print("✅ Neo4j indexes created/verified successfully")
         except Exception as e:
             print(f"⚠️ Error creating Neo4j indexes: {e}")
