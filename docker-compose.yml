@@ -47,7 +47,7 @@ services:
       - DB_PORT=5432
       
       # Neo4j Envs
-      - NEO4J_AUTH=traffic/traffic@2684
+      - NEO4J_AUTH=neo4j/trafficlogs@2684
     ports:
     - "8000:8000"
     command: "python manage.py runserver 0.0.0.0:8000"

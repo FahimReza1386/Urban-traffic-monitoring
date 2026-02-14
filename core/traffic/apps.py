@@ -6,7 +6,7 @@ class TrafficConfig(AppConfig):
     name = 'traffic'
     
     def ready(self):
-        from traffic.api.v1.signals.sync_traffic import sync_traffic_log_to_neo4j
+        from traffic.api.v1.signals.sync_traffic import sync_traffic_log_to_neo4j, sync_cameras_to_neo4j
         
         self.create_neo4j_indexes()
     

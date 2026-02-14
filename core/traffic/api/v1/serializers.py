@@ -18,5 +18,5 @@ class CameraTrafficSerializer(serializers.ModelSerializer):
 
 class CarTrackingViewSerializer(serializers.Serializer):
     plate_number = serializers.CharField(required=False, allow_blank=True)
-    page_number = serializers.IntegerField(required=False, default=1)
-    limit = serializers.IntegerField(required=False, default=10)
+    page = serializers.IntegerField(required=False, default=1)
+    per_page = serializers.IntegerField(required=False, default=10)

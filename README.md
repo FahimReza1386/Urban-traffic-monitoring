@@ -1,49 +1,54 @@
 # Hello Guys...
 
-# whats the my project ??
-this project is urbun traffic monitoring and created by :
 
-- Django, DjangoRestFramework
+## Guideline
+- [Guideline](#guideline)
+- [Goal](#goal)
+- [Demo](#demo)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Database Schema](#database-schema)
 
-- drf-spectacular
+# Goal
 
-- faker 
+Hello, the goal of this project is to record and monitor traffic.
 
-- neo4j 
+# Demo
+![Alt text](docs/assets/img/graf.png)
 
-- postgresql
+# DataBase Schema
+![Alt text](docs/db/database-chart.png)
 
-- docker 
+# Getting Started
+```
 
-- and ....
+git clone https://github.com/FahimReza1386/Urban-traffic-monitoring.git
 
-
-# How to getting the project
-
-git clone 
-
-# How the install project
+```
+# Installation
+```
 docker compose up --build -d
 
 docker compose exec backend python manage.py makemigrations
 
 docker compose exec backend python manage.py runserver
+```
+# How to Create Traffic Data
+go to :
 
-# How the creating traffic ?
+```
 
-go to : http://127.0.0.1:8000/api/swagger
+ http://127.0.0.1:8000/api/swagger
 
-- created camera by url : /api/traffic/camera/create
+```
+- Create a camera : /api/traffic/camera/create
 - created traffic by url : /api/traffic/log/create
 
-if you will getting information by traffic :
+To get traffic information :
 - getting traffic by url : /api/traffic/log/list :
 
-for used this endpoint should the enter plate_number .
+you must enter the plate_number .
 
+## Goodbye 👋
 
-
-
-
-## im Happy
-## For seend you the my repo or my project. 
+Thank you for checking out my project!

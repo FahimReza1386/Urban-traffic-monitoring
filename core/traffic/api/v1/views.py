@@ -32,29 +32,29 @@ class CarTrackingView(ListAPIView):
             parameters=[CarTrackingViewSerializer],
     )
     def get(self, request):
+        start_time = time.perf_counter()
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        start_time = time.time()
-        
+                
         graph_service = GraphService()
         
         
         plate_number = serializer.validated_data.get("plate_number")
-        page_number = serializer.validated_data["page_number"]
-        limit = serializer.validated_data["limit"]
+        page = serializer.validated_data["page"]
+        per_page = serializer.validated_data["per_page"]
         
         if plate_number is not None:
             try:
-                page_number = int(page_number) if page_number else 1
-                limit = int(limit) if limit else 10
+                page = int(page) if page else 1
+                per_page = int(per_page) if per_page else 10
             except ValueError:
                 return Response(
-                    {"error": "page_number و limit باید عدد باشند"},
+                    {"error": "page و per_page باید عدد باشند"},
                     status=400
                 )
             
             tracking = graph_service.get_traffic_by_plate_number_path(
-                plate_number, page_number, limit
+                plate_number, page, per_page
             )
 
             if not tracking:
@@ -65,41 +65,38 @@ class CarTrackingView(ListAPIView):
        
         else:
             tracking = graph_service.get_traffic_by_plate_number_path(
-                None, page_number, limit
+                None, page, per_page
             )
-
-            
-        end_time = time.time()
-        full_time = end_time - start_time 
-        time_formatted = str(datetime.utcfromtimestamp(full_time).strftime('%M:%S.%f'))[:-3]
-        return Response({"path": tracking, "full_time":time_formatted})
-class CarTrackingView1(ListAPIView):   
+        run_time = round(time.perf_counter() - start_time, 6)
+        return Response({"result": tracking, "runtime":run_time}, status=status.HTTP_200_OK)
+  
+class DeleteTraffic(ListAPIView):   
     def get(self, request):
         path_details = GraphService()
         tracking = path_details.delete_all_data()
         return Response({
-            "path": tracking
+            "data": tracking
         })
 
-class SuspiciousVehiclesNeo4jAPIView(ListAPIView):
-    def get(self, request, page_number, limit):
-        start_time = time.time()
-        graph_service = GraphService()
-        tracking = graph_service.get_suspicious_vehicles(
-            page_number, limit
-        )
-        end_time = time.time()
-        full_time = start_time - end_time 
-        return Response({"path": tracking, "full_time":full_time})
+# class SuspiciousVehiclesNeo4jAPIView(ListAPIView):
+#     def get(self, request, page_number, limit):
+#         start_time = time.time()
+#         graph_service = GraphService()
+#         tracking = graph_service.get_suspicious_vehicles(
+#             page_number, limit
+#         )
+#         end_time = time.time()
+#         full_time = start_time - end_time 
+#         return Response({"path": tracking, "full_time":full_time})
 
 
-class GettingTrafficLogsAll(ListAPIView):
-    cache_response_timeout = 60 * 1
-    def get(self, request, page_number, limit):
-        start_time = time.time()
-        graph_service = GraphService()
-        tracking = graph_service.get_all_traffic_logs(page_number, limit)
-        end_time = time.time()
-        full_time = end_time - start_time 
-        time_formatted = str(datetime.utcfromtimestamp(full_time).strftime('%M:%S.%f'))[:-3]
-        return Response({"path": tracking, "full_time":time_formatted})
+# class GettingTrafficLogsAll(ListAPIView):
+#     cache_response_timeout = 60 * 1
+#     def get(self, request, page_number, limit):
+#         start_time = time.time()
+#         graph_service = GraphService()
+#         tracking = graph_service.get_all_traffic_logs(page_number, limit)
+#         end_time = time.time()
+#         full_time = end_time - start_time 
+#         time_formatted = str(datetime.utcfromtimestamp(full_time).strftime('%M:%S.%f'))[:-3]
+#         return Response({"path": tracking, "full_time":time_formatted})

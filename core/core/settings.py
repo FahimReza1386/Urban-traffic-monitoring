@@ -139,6 +139,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # DRF Configuration
 REST_FRAMEWORK={
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_RENDERER_CLASSES": [
+            "core.renderers.CustomJsonRenderer",
+    ],
 }
 
 # Swagger Configuration
@@ -151,7 +154,8 @@ SPECTACULAR_SETTINGS = {
 
 # Neo4j Configuration
 neo_auth_string = os.environ.get("NEO4J_AUTH") 
-
+auth_string = os.environ.get("NEO4J_AUTH")
+user, password = auth_string.split('/', 1)
 NEO4J_CONFIG = {
     'uri': 'neo4j://neo4j:7687',
     'auth': ("neo4j", "traffic@2684")

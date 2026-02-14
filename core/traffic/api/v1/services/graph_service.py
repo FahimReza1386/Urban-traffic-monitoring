@@ -18,109 +18,159 @@ class GraphService:
             print(f"Error connecting to Neo4j: {e}")
             self.driver = None
         
-    def get_traffic_by_plate_number_path(self, plate_number=None, page_number=1, limit=10):
+    def get_traffic_by_plate_number_path(self, plate_number=None, page=1, per_page=10):
         if plate_number != None:
             cypher_query = """ 
             MATCH (cam)-[r:PASSED]->(c:Car {plate_number: $plate_number})
-            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS id , c.plate_number AS plate_number
+            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS car_node_id , c.plate_number AS plate_number
             ORDER BY timestamp DESC
             SKIP $skipValue
-            LIMIT $limit
+            LIMIT $per_page
+            """
+            
+            count_query = """
+            MATCH (cam)-[r:PASSED]->(c:Car {plate_number: $plate_number})
+            RETURN COUNT(r) AS total
             """
         else:
             cypher_query = """ 
             MATCH (cam)-[r:PASSED]->(c:Car)
-            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS id , c.plate_number AS plate_number
+            RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, r.id AS car_node_id , c.plate_number AS plate_number
             ORDER BY timestamp DESC
             SKIP $skipValue
-            LIMIT $limit
+            LIMIT $per_page
+            """
+            
+            count_query = """
+            MATCH (cam)-[r:PASSED]->(c:Car)
+            RETURN COUNT(r) AS total
             """
         
-        skip_value = max(page_number - 1, 0) * limit
-
+        skip_value = max(page - 1, 0) * per_page
         if not self.driver:
-            return []
-
+            return {
+                "results": path_list,
+                "current_page": page,
+                "first_item": first_item_id,
+                "has_pages": page < total_pages,
+                "last_item": last_item_id,
+                "last_page": total_pages,
+                "on_first_page": page == 1,
+                "on_last_page": page >= total_pages,
+                "per_page": per_page,
+                "total" : total,
+                "total_pages": total_pages
+            }
         with self.driver.session() as session:
+            
+            count_result = session.run(
+                count_query,
+                {"plate_number": plate_number}
+            ).single()
+
+            total = count_result["total"] if count_result else 0
+                
             result = session.run(
                 cypher_query,
-                {"plate_number": plate_number, "skipValue": skip_value, "limit": limit}
+                {"plate_number": plate_number, "skipValue": skip_value, "per_page": per_page}
             )
 
             path_list = []
             for record in result:
                 path_list.append({
-                    "id" : record["id"],
+                    "id" : record["car_node_id"],
                     "plate_number" : record["plate_number"],
                     "camera": record["camera"],
                     "timestamp": str(record["timestamp"]),
                     "type_id": record["type_id"]
                 })
 
-            return path_list
-    
-    def get_suspicious_vehicles(self, page_number, limit):
-        skip_value = (limit - 1) * page_number
+            total_pages = (total + per_page - 1) // per_page
 
-        cypher_query = """
-        MATCH (c:Car)
-        WITH c.plate_number AS plate_number, COLLECT(DISTINCT c.type_id) AS type_ids
-        WHERE SIZE(type_ids) > 1
-        RETURN plate_number, type_ids
-        ORDER BY plate_number
-        SKIP $skip_value
-        LIMIT $page_size
-        """
+            last_item_id = path_list[0]["id"] if path_list else None
+            first_item_id  = path_list[-1]["id"] if path_list else None
+
+            return {
+                "results": path_list,
+                "current_page": page,
+                "first_item": first_item_id,
+                "has_pages": page < total_pages,
+                "last_item": last_item_id,
+                "last_page": total_pages,
+                "on_first_page": page == 1,
+                "on_last_page": page >= total_pages,
+                "per_page": per_page,
+                "total" : total,
+                "total_pages": total_pages
+            }
         
-        params = {
-            'skip_value': skip_value,
-            'page_size': limit
-        }
-
-        if not graph_service.driver:
-            return Response({"error": "Neo4j driver not initialized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        with graph_service.driver.session() as session:
-            result = session.run(cypher_query, params)
-            data = []
-            for record in result:
-                data.append({
-                    "plate_number": record["plate_number"],
-                    "type_ids": record["type_ids"]
-                })
-
-            return data
     def delete_all_data(self):
         with self.driver.session() as session:
-            session.run("MATCH (n) DETACH DELETE n")
+            cypher_test = """
+            MATCH (n)
+            CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 10000 ROWS;
+            """
+            session.run(cypher_test)
         
-    def get_all_traffic_logs(self, page_number, limit):
-        cypher_query = """
-        MATCH (cam)-[r:PASSED]->(c:Car)
-        RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, c.plate_number AS plate_number, c.id AS id
-        ORDER BY timestamp DESC
-        SKIP $skipValue
-        LIMIT $limit
-        """
-        skip_value = max(page_number - 1, 0) * limit
+    # def get_suspicious_vehicles(self, page_number, limit):
+    #     skip_value = (limit - 1) * page_number
+
+    #     cypher_query = """
+    #     MATCH (c:Car)
+    #     WITH c.plate_number AS plate_number, COLLECT(DISTINCT c.type_id) AS type_ids
+    #     WHERE SIZE(type_ids) > 1
+    #     RETURN plate_number, type_ids
+    #     ORDER BY plate_number
+    #     SKIP $skip_value
+    #     LIMIT $page_size
+    #     """
         
-        with self.driver.session() as session:  
-            result = session.run(
-                cypher_query,
-                {
-                    "skipValue": skip_value, "limit": limit
-                }
-            )
-            return [
-            {
-                "id" : record["id"],
-                "plate_number": record["plate_number"],
-                "camera": record["camera"],
-                "timestamp": str(record["timestamp"]),
-                "type_id": record["type_id"]
-            }
-            for record in result
-            ]
+    #     params = {
+    #         'skip_value': skip_value,
+    #         'page_size': limit
+    #     }
+
+    #     if not graph_service.driver:
+    #         return Response({"error": "Neo4j driver not initialized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    #     with graph_service.driver.session() as session:
+    #         result = session.run(cypher_query, params)
+    #         data = []
+    #         for record in result:
+    #             data.append({
+    #                 "plate_number": record["plate_number"],
+    #                 "type_ids": record["type_ids"]
+    #             })
+
+    #         return data
+ 
+    # def get_all_traffic_logs(self, page_number, limit):
+    #     cypher_query = """
+    #     MATCH (cam)-[r:PASSED]->(c:Car)
+    #     RETURN cam.name AS camera, r.timestamp AS timestamp, c.type_id AS type_id, c.plate_number AS plate_number, c.id AS id
+    #     ORDER BY timestamp DESC
+    #     SKIP $skipValue
+    #     LIMIT $limit
+    #     """
+    #     skip_value = max(page_number - 1, 0) * limit
+        
+    #     with self.driver.session() as session:  
+    #         result = session.run(
+    #             cypher_query,
+    #             {
+    #                 "skipValue": skip_value, "limit": limit
+    #             }
+    #         )
+    #         return [
+    #         {
+    #             "id" : record["id"],
+    #             "plate_number": record["plate_number"],
+    #             "camera": record["camera"],
+    #             "timestamp": str(record["timestamp"]),
+    #             "type_id": record["type_id"]
+    #         }
+    #         for record in result
+    #         ]
             
     def close(self):
         if self.driver:

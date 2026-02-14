@@ -15,7 +15,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         fake = Faker()
-        for _ in range(100):
+        for _ in range(95):
             
             Cameras.objects.create(
                 name = fake.word(),

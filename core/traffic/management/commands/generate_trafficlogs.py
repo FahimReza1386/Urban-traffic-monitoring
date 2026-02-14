@@ -10,6 +10,12 @@ from faker import Faker
 # Locale Imports
 from traffic.models import TrafficLogs, Cameras
 
+"""
+
+    command : docker compose exec backend python manage.py generate_trafficlogs
+
+"""
+
 class Command(BaseCommand):
     help = _("Generated the TrafficLog Fake Data.")
     
@@ -17,8 +23,8 @@ class Command(BaseCommand):
         fake = Faker()
         all_cameras = list(Cameras.objects.all())
         
-        batch_size = 5000
-        total_records = 80000
+        batch_size = 50000
+        total_records = 1000000
         logs_to_create = []
 
         base_time = datetime.now()
