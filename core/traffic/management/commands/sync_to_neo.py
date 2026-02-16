@@ -1,7 +1,7 @@
 # traffic/management/commands/sync_to_neo.py
 from django.core.management.base import BaseCommand
 from traffic.models import TrafficLogs
-from traffic.api.v1.services.graph_service import graph_service
+from core.traffic.api.v1.services.graph_service import graph_service
 import time
 
 """

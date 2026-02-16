@@ -18,5 +18,9 @@ class CameraTrafficSerializer(serializers.ModelSerializer):
 
 class CarTrackingViewSerializer(serializers.Serializer):
     plate_number = serializers.CharField(required=False, allow_blank=True)
+    type_id = serializers.CharField(required=False, allow_blank=True)
     page = serializers.IntegerField(required=False, default=1)
     per_page = serializers.IntegerField(required=False, default=10)
+    start_date = serializers.DateTimeField(required=False, help_text="Start datetime filter")
+    end_date = serializers.DateTimeField(required=False, help_text="Start datetime filter")
+    order_by = serializers.CharField(required=False, allow_blank=True)

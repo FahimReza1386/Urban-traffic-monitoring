@@ -15,13 +15,13 @@ class TrafficConfig(AppConfig):
             if graph_service.driver:
                 with graph_service.driver.session() as session:
                     session.run("""
-                    CREATE INDEX car_plate IF NOT EXISTS 
-                    FOR (c:Car) ON (c.plate_number)
+                    CREATE INDEX car_plate_time IF NOT EXISTS
+                    FOR (c:Car) ON (c.plate_number);
                     """)
                     
                     session.run("""
-                    CREATE INDEX traffic_time IF NOT EXISTS 
-                    FOR (c:Car) ON (c.timestamp)
+                    CREATE INDEX car_type_id IF NOT EXISTS
+                    FOR (c:Car) ON (c.type_id);
                     """)
                     
                     session.run("""
@@ -33,11 +33,10 @@ class TrafficConfig(AppConfig):
                     CREATE INDEX suspicious_plate IF NOT EXISTS 
                     FOR (c:suspicious) ON (c.plate_number)
                     """)
-                    session.run("""
-                    CREATE INDEX suspicious_plate IF NOT EXISTS 
-                    FOR (c:suspicious) ON (c.timestamp)
-                    """)
                     
-                    print("✅ Neo4j indexes created/verified successfully")
+                    session.run("""
+                    CREATE INDEX passed_timestamp_index IF NOT EXISTS FOR ()-[r:PASSED]->() ON (r.timestamp)
+                    """)
+
         except Exception as e:
             print(f"⚠️ Error creating Neo4j indexes: {e}")
