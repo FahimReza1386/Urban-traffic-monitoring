@@ -11,6 +11,9 @@ from faker import Faker
 from traffic.models import Cameras
 
 class Command(BaseCommand):
+    """
+        Create Fake Data For Camera Table.
+    """
     help = _("Generated the TrafficLog Fake Data.")
     
     def handle(self, *args, **options):

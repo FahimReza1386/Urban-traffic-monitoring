@@ -11,6 +11,13 @@ class TrafficConfig(AppConfig):
         self.create_neo4j_indexes()
     
     def create_neo4j_indexes(self):
+        """
+            Creating Index For Fields in DB of this models :
+                - TrafficLogs : plate_number , type_id
+                - Cameras : name
+                - SuspiciousVehicles : plate_number, type_id
+                - For Relationship camera to Traffic Logs: timestamp
+        """
         try:
             if graph_service.driver:
                 with graph_service.driver.session() as session:
@@ -32,6 +39,11 @@ class TrafficConfig(AppConfig):
                     session.run("""
                     CREATE INDEX suspicious_plate IF NOT EXISTS 
                     FOR (c:suspicious) ON (c.plate_number)
+                    """)
+                    
+                    session.run("""
+                    CREATE INDEX suspicious_type IF NOT EXISTS 
+                    FOR (c:suspicious) ON (c.type_id)
                     """)
                     
                     session.run("""

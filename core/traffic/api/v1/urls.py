@@ -11,4 +11,4 @@ urlpatterns = [
     path("camera/create", views.CreateCameraView.as_view(), name="camera-create"),
     # path("log/delete/all", views.DeleteTraffic.as_view(), name="path log"),
     # path("log/get/all/    <int:page_number>/<int:limit>", views.GettingTrafficLogsAll.as_view(), name="path log"),
-]  
+]

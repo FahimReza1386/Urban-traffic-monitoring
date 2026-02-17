@@ -1,13 +1,22 @@
-asgiref==3.11.1
-attrs==25.4.0
+# Installation
 Django==6.0.2
 djangorestframework==3.16.1
+django-filter==25.2
+Faker==40.4.0
+
+# Api Documentation
 drf-spectacular==0.29.0
-inflection==0.5.1
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
+
+# DataBase Installation
 neo4j==6.1.0
 psycopg2-binary==2.9.11
+
+# Python Installation
+asgiref==3.11.1
+attrs==25.4.0
+inflection==0.5.1
 pytz==2025.2
 PyYAML==6.0.3
 referencing==0.37.0
@@ -15,5 +24,3 @@ rpds-py==0.30.0
 sqlparse==0.5.5
 typing_extensions==4.15.0
 uritemplate==4.2.0
-django-filter
-faker

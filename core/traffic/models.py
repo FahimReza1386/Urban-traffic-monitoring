@@ -3,6 +3,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 class Cameras(models.Model):
+    """
+        This Table in DB For Saving Cameras ..
+    """
     name = models.CharField(
         max_length=50,
         verbose_name=_("name"),
@@ -17,12 +20,18 @@ class Cameras(models.Model):
         verbose_name_plural = _("Cameras")    
     
 class Types(models.IntegerChoices):
+    """
+        Multiple Choice for car type ..
+    """
     heavy_car = 1, _("heavy car")
     car = 2, _("car")
     motorcycle = 3, _("motorcycle")
     heavy_engine= 4, _("heavy engine")
     
 class TrafficLogs(models.Model):
+    """
+        This Table in DB For Saving TrafficLogs ..
+    """
     plate_number = models.CharField(
         verbose_name=_("plate number"),
     )
@@ -52,6 +61,9 @@ class TrafficLogs(models.Model):
         ]
         
 class SuspiciousVehicles(models.Model):
+    """
+        This Table in DB For Saving Suspicious Vehicles ..
+    """
     plate_number = models.CharField(
         verbose_name=_("plate number"),
     )

@@ -8,6 +8,11 @@ from traffic.api.v1.services.graph_service import graph_service
 
 @receiver(post_save, sender=TrafficLogs)
 def sync_traffic_log_to_neo4j(sender, instance, created, **kwargs):
+    """
+        Creating Signals To When Creating object for TrafficLogs Table :
+    """
+    
+    
     params = {
         'camera_name': instance.camera_id.name,
         'type_id': instance.type_id,
@@ -47,6 +52,9 @@ def sync_traffic_log_to_neo4j(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Cameras)
 def sync_cameras_to_neo4j(sender, instance, created, **kwargs):
+    """
+        Creating Signals To When Creating object for Cameras Table :
+    """
     params = {
         'name': instance.name,
         'id' : instance.id or instance.pk

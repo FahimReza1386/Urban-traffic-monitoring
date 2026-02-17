@@ -10,13 +10,10 @@ from faker import Faker
 # Locale Imports
 from traffic.models import TrafficLogs, Cameras
 
-"""
-
-    command : docker compose exec backend python manage.py generate_trafficlogs
-
-"""
-
 class Command(BaseCommand):
+    """
+        Create Fake Data For TrafficLogs Table.
+    """
     help = _("Generated the TrafficLog Fake Data.")
     
     def handle(self, *args, **options):
