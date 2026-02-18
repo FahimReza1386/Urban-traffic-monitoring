@@ -1,4 +1,11 @@
 services:
+  redis:
+    image: redis
+    container_name: traffic-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
   db:
     image: postgres:latest
     container_name: traffic-postgres
@@ -55,8 +62,54 @@ services:
       - ./core:/usr/src/app
     depends_on:
       - db
+      - redis
       - neo4j
   
+  celery:
+    container_name: traffic-celery
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    volumes: 
+      - ./core:/usr/src/app
+    environment:
+      # Django Envs
+
+      - DEBUG=True
+      - SECRET_KEY=Fahim12345678@86;
+
+      # Neo4j Envs
+      - NEO4J_AUTH=neo4j/trafficlogs@2684
+    command: celery -A core worker --loglevel=info -Q celery,celery:1,celery:2
+    depends_on:
+      - db
+      - redis
+      - backend
+  
+  celery_beat:
+    container_name: traffic-celery_beat
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    volumes: 
+      - ./core:/usr/src/app
+    environment:
+      # Django Envs
+
+      - DEBUG=True
+      - SECRET_KEY=Fahim12345678@86;
+      
+      # Neo4j Envs
+      - NEO4J_AUTH=neo4j/trafficlogs@2684
+    depends_on:
+      - db
+      - redis
+      - backend
+      - celery
+  
+
 volumes:
   traffic-postgres:
   traffic-neo4j:

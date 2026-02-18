@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'traffic',
     'drf_spectacular',
+    'celery'
 ]
 
 MIDDLEWARE = [
@@ -160,3 +161,11 @@ NEO4J_CONFIG = {
     'uri': 'neo4j://neo4j:7687',
     'auth': ("neo4j", "traffic@2684")
 }
+
+
+# Celery Configuration
+CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
