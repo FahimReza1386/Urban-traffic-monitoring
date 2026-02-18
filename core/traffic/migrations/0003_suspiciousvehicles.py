@@ -7,22 +7,51 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('traffic', '0002_alter_trafficlogs_plate_number'),
+        ("traffic", "0002_alter_trafficlogs_plate_number"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SuspiciousVehicles',
+            name="SuspiciousVehicles",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('plate_number', models.CharField(verbose_name='plate number')),
-                ('type_id', models.IntegerField(choices=[(1, 'heavy car'), (2, 'car'), (3, 'motorcycle'), (4, 'heavy engine')], verbose_name='type id')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, verbose_name='timestamp')),
-                ('camera_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='traffic.cameras', verbose_name='camera id')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("plate_number", models.CharField(verbose_name="plate number")),
+                (
+                    "type_id",
+                    models.IntegerField(
+                        choices=[
+                            (1, "heavy car"),
+                            (2, "car"),
+                            (3, "motorcycle"),
+                            (4, "heavy engine"),
+                        ],
+                        verbose_name="type id",
+                    ),
+                ),
+                (
+                    "timestamp",
+                    models.DateTimeField(auto_now_add=True, verbose_name="timestamp"),
+                ),
+                (
+                    "camera_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="traffic.cameras",
+                        verbose_name="camera id",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'suspicious vehicles',
-                'verbose_name_plural': 'suspicious vehicles',
+                "verbose_name": "suspicious vehicles",
+                "verbose_name_plural": "suspicious vehicles",
             },
         ),
     ]

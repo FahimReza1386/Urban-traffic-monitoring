@@ -2,9 +2,8 @@
 from rest_framework.renderers import JSONRenderer
 
 
-
 class CustomJsonRenderer(JSONRenderer):
-    
+
     def render(self, data, accepted_media_type=None, renderer_context=None):
         response = renderer_context.get("response") if renderer_context else None
 

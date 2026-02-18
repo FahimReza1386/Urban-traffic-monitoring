@@ -1,0 +1,14 @@
+[flake8]
+
+exclude = 
+    .git,
+    .gitignore,
+    settings.py,
+    .env,
+    venv,
+    __init__.py ,
+
+ignore = 
+    E501
+    F401
+    F821

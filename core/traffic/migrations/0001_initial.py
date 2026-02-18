@@ -8,34 +8,81 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Cameras',
+            name="Cameras",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='name')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, verbose_name="name")),
             ],
             options={
-                'verbose_name': 'Cameras',
-                'verbose_name_plural': 'Cameras',
+                "verbose_name": "Cameras",
+                "verbose_name_plural": "Cameras",
             },
         ),
         migrations.CreateModel(
-            name='TrafficLogs',
+            name="TrafficLogs",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('plate_number', models.CharField(max_length=6, verbose_name='plate number')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, verbose_name='timestamp')),
-                ('type_id', models.IntegerField(choices=[(1, 'heavy car'), (2, 'car'), (3, 'motorcycle'), (4, 'heavy engine')], verbose_name='type id')),
-                ('camera_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='traffic.cameras', verbose_name='camera id')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "plate_number",
+                    models.CharField(max_length=6, verbose_name="plate number"),
+                ),
+                (
+                    "timestamp",
+                    models.DateTimeField(auto_now_add=True, verbose_name="timestamp"),
+                ),
+                (
+                    "type_id",
+                    models.IntegerField(
+                        choices=[
+                            (1, "heavy car"),
+                            (2, "car"),
+                            (3, "motorcycle"),
+                            (4, "heavy engine"),
+                        ],
+                        verbose_name="type id",
+                    ),
+                ),
+                (
+                    "camera_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="traffic.cameras",
+                        verbose_name="camera id",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Traffic logs',
-                'verbose_name_plural': 'Traffic logs',
-                'indexes': [models.Index(fields=['plate_number', 'type_id'], name='plate_type_idx'), models.Index(fields=['camera_id', 'timestamp'], name='camera_time_idx'), models.Index(fields=['-timestamp'], name='timestamp_desc_idx')],
+                "verbose_name": "Traffic logs",
+                "verbose_name_plural": "Traffic logs",
+                "indexes": [
+                    models.Index(
+                        fields=["plate_number", "type_id"], name="plate_type_idx"
+                    ),
+                    models.Index(
+                        fields=["camera_id", "timestamp"], name="camera_time_idx"
+                    ),
+                    models.Index(fields=["-timestamp"], name="timestamp_desc_idx"),
+                ],
             },
         ),
     ]
